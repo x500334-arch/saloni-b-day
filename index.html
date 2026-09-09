@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Happy Birthday! 🎂 A Celebration Just For You</title>
+<meta name="description" content="An interactive 3D birthday celebration page with wishes, a cooldown surprise box, gift wishlist, and friends' messages.">
+<!-- Put this in the <head> of index.html -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+
+<!-- W3.CSS -->
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+<!-- Site styles -->
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Staticky texture overlay -->
+<div class="static-overlay" aria-hidden="true"></div>
+
+<!-- Ambient floating decor (balloons + sparkles) -->
+<div id="decor-canvas" aria-hidden="true"></div>
+
+<!-- Confetti burst canvas -->
+<canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+<!-- Toast notification -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- Section quick-nav dots -->
+<nav class="nav-dots" aria-label="Section navigation">
+  <a href="#hero" title="Hero"></a>
+  <a href="#cooler-section" title="Surprise Box"></a>
+  <a href="#letter-section" title="Letter"></a>
+  <a href="#wishlist-section" title="Gift Wishlist"></a>
+  <a href="#friends-section" title="Friends' Wishes"></a>
+</nav>
+
+<main>
+
+  <!-- ============================== HERO ============================== -->
+  <section id="hero" aria-label="Birthday hero">
+    <canvas id="hero-3d-canvas" aria-hidden="true"></canvas>
+
+    <div class="hero-content">
+      <figure class="photo-frame">
+        <img src="images/birthday-person.png" alt="Photo of the birthday person wearing a party hat" />
+      </figure>
+
+      <div class="hero-headline-wrap">
+        <canvas id="hero-text-canvas" aria-label="3D animated Happy Birthday headline"></canvas>
+      </div>
+
+      <p class="hero-name">It's <span>Your</span> Special Day! 🎉</p>
+      <p class="hero-sub">Today the world gets to celebrate the most amazing, funniest, and kindest person we know. Scroll down for surprises made just for you 💕</p>
+
+      <div class="scroll-hint"><i class="fa-solid fa-chevron-down"></i> scroll for the fun</div>
+    </div>
+  </section>
+
+  <!-- ====================== 3D COOLER / SURPRISE BOX ====================== -->
+  <section id="cooler-section" aria-label="Interactive surprise box">
+    <span class="section-label" style="display:block;width:fit-content;margin:0 auto 14px;">Tap &amp; Play</span>
+    <h2 class="section-title">Your Birthday Surprise Box 🎀</h2>
+    <p class="section-sub">Drag to spin it around, then click the box (or the button) to pop the lid and reveal what's cooling inside!</p>
+
+    <div class="cooler-stage">
+      <canvas id="cooler-canvas"></canvas>
+    </div>
+
+    <p class="cooler-hint"><i class="fa-solid fa-hand-pointer"></i> Drag to rotate • Click to open</p>
+    <button id="cooler-open-btn" class="cooler-btn" type="button">
+      <i class="fa-solid fa-gift"></i>&nbsp; Open My Surprise!
+    </button>
+  </section>
+
+  <!-- ============================ LETTER ============================ -->
+  <section id="letter-section" aria-label="Birthday letter">
+    <span class="section-label" style="display:block;width:fit-content;margin:0 auto 14px;">A Little Note</span>
+    <h2 class="section-title">A Letter Just For You 💌</h2>
+    <p class="section-sub">Funny, sappy, and 100% true — read it out loud in your birthday voice.</p>
+
+    <article class="letter-card">
+      <p class="letter-greeting">My Dearest Birthday Star,</p>
+      <div class="letter-body">
+        <p>Happy birthday to the human equivalent of a warm cookie fresh out of the oven — comforting, a little chaotic on the inside, and somehow everyone's favorite. 🍪</p>
+        <p>I hope today is filled with cake for breakfast, zero notifications from work, and exactly the right amount of attention (aka: all of it, please stand still while we sing).</p>
+        <p>You've survived another year of questionable decisions, incredible plot twists, and at least three "this is the last time I'm doing this" moments that absolutely were not the last time. And somehow you still show up funnier, kinder, and more fabulous than before. Honestly, unfair to the rest of us.</p>
+        <p>So here's to more inside jokes, more spontaneous dance breaks, more snacks shared (or stolen), and many, many more birthdays where we get to remind you just how loved you are.</p>
+        <p>Now blow out those candles before we start singing — badly, loudly, and with way too much enthusiasm. 🎂🎶</p>
+      </div>
+      <p class="letter-signoff">With all the love &amp; confetti, 🎊<br>Your favorite people</p>
+    </article>
+  </section>
+
+  <!-- ======================== GIFT WISHLIST ======================== -->
+  <section id="wishlist-section" aria-label="Gift wishlist">
+    <span class="section-label" style="display:block;width:fit-content;margin:0 auto 14px;">Psst... Secret</span>
+    <h2 class="section-title">Drop a Gift Idea 🎁</h2>
+    <p class="section-sub">Have an idea, link, or size suggestion? Send it secretly to the organizer. <strong>Submissions are completely private</strong> and will never appear on this page!</p>
+
+    <div class="card-panel">
+      <form id="wishlist-form" class="w3-container">
+        <label class="w3-text-pink" style="font-weight:600;" for="gift-name">Gift idea</label>
+        <input class="w3-input" type="text" id="gift-name" placeholder="e.g. Cozy fuzzy socks" required maxlength="120">
+
+        <label class="w3-text-pink" style="font-weight:600;" for="gift-details">Details / link / size (optional)</label>
+        <textarea class="w3-textarea" id="gift-details" rows="2" placeholder="Color, size, store link, or why it's perfect..." maxlength="300"></textarea>
+
+        <label class="w3-text-pink" style="font-weight:600;" for="gift-by">Your name (optional)</label>
+        <input class="w3-input" type="text" id="gift-by" placeholder="Who's adding this idea?" maxlength="60">
+
+        <button type="submit" class="btn-cute"><i class="fa-solid fa-lock"></i>&nbsp; Send Privately</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ======================= FRIENDS' WISHES ======================= -->
+  <section id="friends-section" aria-label="Friends' birthday wishes">
+    <span class="section-label" style="display:block;width:fit-content;margin:0 auto 14px;">From Everyone</span>
+    <h2 class="section-title">Friends &amp; Family Wishes 💗</h2>
+    <p class="section-sub">Leave a birthday message below — silly, sweet, or straight-up roast, all wishes welcome!</p>
+
+    <div class="card-panel">
+      <form id="friends-form" class="w3-container">
+        <label class="w3-text-pink" style="font-weight:600;" for="friend-name">Your name</label>
+        <input class="w3-input" type="text" id="friend-name" placeholder="e.g. Sam" maxlength="60">
+
+        <label class="w3-text-pink" style="font-weight:600;" for="friend-message">Your birthday wish</label>
+        <textarea class="w3-textarea" id="friend-message" rows="3" placeholder="Write your birthday message here..." required maxlength="400"></textarea>
+
+        <label class="w3-text-pink" style="font-weight:600;">Pick a mood</label>
+        <div class="emoji-picker" id="emoji-picker">
+          <button type="button" class="emoji-choice selected">🎉</button>
+          <button type="button" class="emoji-choice">🥳</button>
+          <button type="button" class="emoji-choice">💗</button>
+          <button type="button" class="emoji-choice">🎂</button>
+          <button type="button" class="emoji-choice">✨</button>
+          <button type="button" class="emoji-choice">😂</button>
+        </div>
+
+        <button type="submit" class="btn-cute"><i class="fa-solid fa-paper-plane"></i>&nbsp; Send Wish</button>
+      </form>
+    </div>
+
+    <div class="friends-grid" id="friends-grid" aria-live="polite">
+      <p class="empty-note">Loading messages...</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Made with 💕 for the best birthday ever &nbsp;·&nbsp; <span id="year"></span>
+</footer>
+
+<!-- Three.js core + legacy addons (FontLoader / TextGeometry) compatible with r0.128 -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/TextGeometry.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FontLoader.js"></script>
+
+<script src="js/decor.js"></script>
+<script src="js/confetti.js"></script>
+<script src="js/hero3d.js"></script>
+<script src="js/cooler3d.js"></script>
+<script src="js/app.js"></script>
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>
